@@ -1,18 +1,20 @@
 from datetime import datetime
 
-from sqlalchemy import Column, Boolean, Date, Number, String, UUID
+from sqlalchemy import Column, Boolean, Date, Integer, String, UUID
 
 from app.orm import ORMModelBase
 
 class PromptModel(ORMModelBase):
+    __tablename__ = 'prompt'
+
     model_id = Column(UUID, nullable=False, primary_key=True)
     # checklist = Column() # FK.checklist
     created_on = Column(Date, nullable=False, default=datetime.now())
     criticality = Column(String, nullable=False, default='default')
     date = Column(Date, nullable=False)
     defer_period = Column(String, nullable=False, default='week')
-    defer_quantity = Column(Number, nullable=False, default=2)
-    defer_count = Column(Number, nullable=False, default=0)
+    defer_quantity = Column(Integer, nullable=False, default=2)
+    defer_count = Column(Integer, nullable=False, default=0)
     deleted = Column(Boolean, nullable=True, default=False)
     deleted_on = Column(Date, nullable=True)
     description = Column(String, nullable=True)
@@ -39,3 +41,7 @@ class PromptModel(ORMModelBase):
             'title': self.title, #string;
             'updatedOn': self.updated_on, #string | null; // date
         }
+
+    @classmethod
+    def find_all(cls, db):
+        return db.query(cls).all()

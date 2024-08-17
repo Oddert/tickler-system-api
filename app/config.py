@@ -9,3 +9,5 @@ for section in config.sections():
     for key, value in config.items(section):
         print(key, value)
         globals()[key] = value.lower()
+
+DATABASE_URI = 'sqlite:///./local-database.db'

@@ -20,10 +20,10 @@ class Response:
 
 
 class RespondOk(Response):
-    def __init__(self, payload={}, message='Request created successfully.', code=200, error=None):
+    def __init__(self, payload={}, message='Request completed successfully.', code=200, error=None):
         super(RespondOk, self).__init__(payload=payload, message=message, code=code, error=error)
         self.code = code if code else 200
-        self.message = message if message else 'Request created successfully.'
+        self.message = message if message else 'Request completed successfully.'
 
 
 class RespondCreated(Response):
