@@ -2,6 +2,7 @@ import uvicorn
 
 from fastapi import FastAPI
 
+from resources.auth_resources import router as auth_routes
 from resources.prompt_resources import router as prompt_routes
 
 # from app.config import port
@@ -12,6 +13,7 @@ from app.orm import ORMModelBase
 server = FastAPI()
 
 server.include_router(prompt_routes, prefix='/v0', tags=['Prompts'])
+server.include_router(auth_routes, tags=['Auth'])
 
 ORMModelBase.metadata.create_all(bind=engine, checkfirst=True)
 
