@@ -13,3 +13,7 @@ class APIToken(BaseModel):
         max_length=125,
         title='The JWT access token.'
     )
+
+class JWTContent(BaseModel):
+    exp: int
+    sub: str
