@@ -15,4 +15,4 @@ def get_all_prompts(
 ):
     query = PromptModel.find_all(db)
     print(query)
-    return RespondOk().send(response)
+    return RespondOk(payload=query).send(response)
