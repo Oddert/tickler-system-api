@@ -1,5 +1,7 @@
 configparser
 fastapi
+passlib[bycrypt]
+python-jose[cryptography]
+python-multipart
 sqlalchemy
-sqlite
 uvicorn
