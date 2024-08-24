@@ -38,7 +38,7 @@ def require_auth(db=Depends(get_db), token: str=Depends(oath)) -> APIUser:
     except Exception as ex:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail='Could not validate JWT authorisation.',
+            detail='Could not validate JWT authorisation.' + str(ex),
             headers={
                 'WWW-Authenticate': 'Bearer'
             },
