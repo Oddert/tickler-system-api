@@ -1,8 +1,11 @@
 configparser
 fastapi
+loguru
 passlib[bcrypt]
 pyjwt
+python-dateutil
 python-jose[cryptography]
 python-multipart
+ruff
 sqlalchemy
 uvicorn
