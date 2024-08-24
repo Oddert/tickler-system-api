@@ -1,4 +1,5 @@
-'''Handles all routes for /prompt.'''
+"""Handles all routes for /prompt."""
+
 # pylint: disable=broad-exception-caught
 from dateutil.parser import parse
 from uuid import UUID
@@ -10,7 +11,12 @@ from app.db import get_db
 
 from security.middleware import require_auth
 
-from utils.responses import RespondNotFound, RespondOk, RespondUnauthorised, RespondServerError
+from utils.responses import (
+    RespondNotFound,
+    RespondOk,
+    RespondUnauthorised,
+    RespondServerError,
+)
 
 from schemas.prompt import PromptPost, PromptPut
 from schemas.user import APIUser
@@ -19,13 +25,14 @@ from models.prompt import PromptModel
 
 router = APIRouter()
 
+
 @router.get('/prompt')
 def get_all_prompts(  # pylint: disable = unused-variable
     response: Response,
     db=Depends(get_db),
-    user: APIUser=Depends(require_auth),
+    user: APIUser = Depends(require_auth),
 ):
-    '''Gets all prompts for a user.'''
+    """Gets all prompts for a user."""
     query = PromptModel.find_all_by_username(db, user.username)
     prompts = [p.to_json() for p in query]
     return RespondOk(payload=prompts).send(response)
@@ -36,9 +43,9 @@ def create_prompt_single(  # pylint: disable = unused-variable
     response: Response,
     prompt: PromptPost,
     db=Depends(get_db),
-    user: APIUser=Depends(require_auth),
+    user: APIUser = Depends(require_auth),
 ):
-    '''Creates a new prompt.'''
+    """Creates a new prompt."""
     try:
         created_prompt = PromptModel(
             criticality=prompt.criticality,
@@ -57,11 +64,11 @@ def create_prompt_single(  # pylint: disable = unused-variable
         db.commit()
         db.flush()
 
-        return RespondOk({ 'prompt': created_prompt.to_json() }).send()
+        return RespondOk({'prompt': created_prompt.to_json()}).send()
 
     except Exception as ex:
         logger.warning(str(ex))
-        return RespondServerError({ 'error': str(ex) }).send(response)
+        return RespondServerError({'error': str(ex)}).send(response)
 
 
 @router.put('/prompt/{prompt_id}')
@@ -70,21 +77,21 @@ def update_prompt(  # pylint: disable = unused-variable
     prompt: PromptPut,
     prompt_id: str,
     db=Depends(get_db),
-    user: APIUser=Depends(require_auth),
+    user: APIUser = Depends(require_auth),
 ):
-    '''Updates a prompt.'''
+    """Updates a prompt."""
     try:
         found_prompt: PromptModel = PromptModel.find_by_id(db, prompt_id)
 
         if not found_prompt:
-            return RespondNotFound({
-                'message': 'No prompt with id "{prompt_id}" found.'
-            }).send(response)
+            return RespondNotFound(
+                {'message': 'No prompt with id "{prompt_id}" found.'}
+            ).send(response)
 
         if UUID(user.user_id) != found_prompt.user_id:
-            return RespondUnauthorised({
-                'message': 'You do not have permission to modify this prompt.'
-            }).send(response)
+            return RespondUnauthorised(
+                {'message': 'You do not have permission to modify this prompt.'}
+            ).send(response)
 
         created_prompt = PromptModel(
             criticality=prompt.criticality,
@@ -104,8 +111,8 @@ def update_prompt(  # pylint: disable = unused-variable
         db.commit()
         db.flush()
 
-        return RespondOk({ 'prompt': created_prompt.to_json() }).send()
+        return RespondOk({'prompt': created_prompt.to_json()}).send()
 
     except Exception as ex:
         logger.warning(str(ex))
-        return RespondServerError({ 'error': str(ex) }).send(response)
+        return RespondServerError({'error': str(ex)}).send(response)

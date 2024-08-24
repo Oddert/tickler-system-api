@@ -1,4 +1,5 @@
-'''Utility functions for creating and refreshing JWTs.'''
+"""Utility functions for creating and refreshing JWTs."""
+
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -13,8 +14,8 @@ from app.config import (
 )
 
 
-def create_access_token(username: str | Any, expires_delta: int=None) -> str:
-    '''
+def create_access_token(username: str | Any, expires_delta: int = None) -> str:
+    """
     Generates a JWT access token, binding a username or other 'sub' parameter.
 
     Parameters:
@@ -23,12 +24,12 @@ def create_access_token(username: str | Any, expires_delta: int=None) -> str:
 
     Returns:
     encoded_token: The JWT token string.
-    '''
+    """
     if expires_delta:
         expires = datetime.now() + timedelta(expires_delta)
     else:
         expires = datetime.now() + timedelta(minutes=JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
-    
+
     token = {
         'exp': expires,
         'sub': str(username),
@@ -41,8 +42,8 @@ def create_access_token(username: str | Any, expires_delta: int=None) -> str:
     return encoded_token
 
 
-def create_refresh_token(username: str | Any, expires_delta: int=None) -> str:
-    '''
+def create_refresh_token(username: str | Any, expires_delta: int = None) -> str:
+    """
     Generates a JWT refresh token, binding a username or other 'sub' parameter.
 
     Parameters:
@@ -51,12 +52,12 @@ def create_refresh_token(username: str | Any, expires_delta: int=None) -> str:
 
     Returns:
     encoded_token: The JWT token string.
-    '''
+    """
     if expires_delta:
         expires = datetime.now() + timedelta(expires_delta)
     else:
         expires = datetime.now() + timedelta(minutes=JWT_REFRESH_TOKEN_EXPIRE_MINUTES)
-    
+
     token = {
         'exp': expires,
         'sub': str(username),

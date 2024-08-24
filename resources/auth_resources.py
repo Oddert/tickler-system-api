@@ -16,14 +16,15 @@ from models.user import UserModel
 
 router = APIRouter()
 
+
 @router.post('/signup')
 # @router.post('/signup', response_model=APIUser)
 def create_user(
     # response: Response,
     user: AuthUserPost,
-    db: Session=Depends(get_db)
+    db: Session = Depends(get_db),
 ):
-    '''Creates a new user.'''
+    """Creates a new user."""
     found_user = UserModel.find_by_username(db, user.username)
 
     if found_user:
@@ -43,21 +44,22 @@ def create_user(
     db.commit()
     db.flush()
 
-    return RespondOk({ 'user': created_user.to_json() }).send()
+    return RespondOk({'user': created_user.to_json()}).send()
+
 
 @router.post('/login', response_model=APIToken)
 def login_user(
     # response: Response,
-    db: Session=Depends(get_db),
-    form: OAuth2PasswordRequestForm=Depends(),
+    db: Session = Depends(get_db),
+    form: OAuth2PasswordRequestForm = Depends(),
 ):
-    '''Logs a user in, returns an access_token and refresh_token.'''
+    """Logs a user in, returns an access_token and refresh_token."""
     found_user = UserModel.find_by_username(db, form.username)
 
     if not found_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail='Incorrect email or password.'
+            detail='Incorrect email or password.',
         )
         # return RespondBadRequest(
         #     message='Incorrect email or password.'
@@ -68,7 +70,7 @@ def login_user(
     if not verified:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail='Incorrect email or password.'
+            detail='Incorrect email or password.',
         )
         # return RespondBadRequest(
         #     message='Incorrect email or password.'
@@ -79,7 +81,8 @@ def login_user(
         'refresh_token': create_refresh_token(found_user.username),
     }
 
+
 @router.get('/user')
-def temp (db: Session=Depends(get_db)):
-    '''Debug route to return all users'''
+def temp(db: Session = Depends(get_db)):
+    """Debug route to return all users"""
     return UserModel.find_all(db)

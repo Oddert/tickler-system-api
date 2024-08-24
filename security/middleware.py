@@ -18,12 +18,11 @@ oath = OAuth2PasswordBearer(
     scheme_name='JWT',
 )
 
-def require_auth(db=Depends(get_db), token: str=Depends(oath)) -> APIUser:
+
+def require_auth(db=Depends(get_db), token: str = Depends(oath)) -> APIUser:
     try:
         decoded_token = jwt.decode(
-            token,
-            key=JWT_SECRET_KEY,
-            algorithms=[JWT_ALGORITHM]
+            token, key=JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM]
         )
         token_parsed = JWTContent(**decoded_token)
 
@@ -31,28 +30,22 @@ def require_auth(db=Depends(get_db), token: str=Depends(oath)) -> APIUser:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail='JWT token expired.',
-                headers={
-                    'WWW-Authenticate': 'Bearer'
-                },
+                headers={'WWW-Authenticate': 'Bearer'},
             )
     except Exception as ex:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail='Could not validate JWT authorisation.' + str(ex),
-            headers={
-                'WWW-Authenticate': 'Bearer'
-            },
+            headers={'WWW-Authenticate': 'Bearer'},
         )
-    
+
     found_user = UserModel.find_by_username(db, token_parsed.sub)
 
     if not found_user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='User does not exist.',
-            headers={
-                'WWW-Authenticate': 'Bearer'
-            },
+            headers={'WWW-Authenticate': 'Bearer'},
         )
-    
+
     return APIUser(**found_user.to_json())
