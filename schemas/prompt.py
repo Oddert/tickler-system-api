@@ -78,3 +78,31 @@ class PromptPut(PromptPost):
         description='The number of times the prompt has been deferred.',
         min=0,
     )
+
+
+class PromptDefer(BaseModel):
+    """Represents a PUT request to defer a Prompt."""
+
+    deferredCount: int = Field(
+        0,
+        title='The defer count.',
+        description='The number of times the prompt has been deferred.',
+        min=0,
+    )
+    deferPeriod: str = (
+        Field(
+            'week',
+            title='The date period.',
+            description='The unit time period quantified by deferQuantity.',
+            pattern='^(day|month|year)$',
+        ),
+    )
+    deferQuantity: int = (
+        Field(
+            2,
+            title='The defer quantity.',
+            description='The number of units to defer by.',
+            min=1,
+            max=999,
+        ),
+    )

@@ -1,6 +1,7 @@
 """Handles all routes for /prompt."""
 
 # pylint: disable=broad-exception-caught
+from datetime import datetime
 from dateutil.parser import parse
 from uuid import UUID
 
@@ -18,7 +19,7 @@ from utils.responses import (
     RespondServerError,
 )
 
-from schemas.prompt import PromptPost, PromptPut
+from schemas.prompt import PromptDefer, PromptPost, PromptPut
 from schemas.user import APIUser
 
 from models.prompt import PromptModel
@@ -30,10 +31,11 @@ router = APIRouter()
 def get_all_prompts(  # pylint: disable = unused-variable
     response: Response,
     db=Depends(get_db),
+    include_deleted: bool = False,
     user: APIUser = Depends(require_auth),
 ):
     """Gets all prompts for a user."""
-    query = PromptModel.find_all_by_username(db, user.username)
+    query = PromptModel.find_all_by_username(db, user.username, include_deleted)
     prompts = [p.to_json() for p in query]
     return RespondOk(payload=prompts).send(response)
 
@@ -85,12 +87,12 @@ def update_prompt(  # pylint: disable = unused-variable
 
         if not found_prompt:
             return RespondNotFound(
-                {'message': 'No prompt with id "{prompt_id}" found.'}
+                message='No prompt with id "{prompt_id}" found.'
             ).send(response)
 
         if UUID(user.user_id) != found_prompt.user_id:
             return RespondUnauthorised(
-                {'message': 'You do not have permission to modify this prompt.'}
+                message='You do not have permission to modify this prompt.'
             ).send(response)
 
         created_prompt = PromptModel(
@@ -112,6 +114,75 @@ def update_prompt(  # pylint: disable = unused-variable
         db.flush()
 
         return RespondOk({'prompt': created_prompt.to_json()}).send()
+
+    except Exception as ex:
+        logger.warning(str(ex))
+        return RespondServerError({'error': str(ex)}).send(response)
+
+
+@router.put('/prompt/{prompt_id}/defer')
+def defer_prompt(  # pylint: disable = unused-variable
+    response: Response,
+    prompt_id: str,
+    prompt: PromptDefer,
+    db=Depends(get_db),
+    user: APIUser = Depends(require_auth),
+):
+    """Defers a prompt."""
+    try:
+        found_prompt = PromptModel.find_by_id(db, prompt_id)
+
+        if not found_prompt:
+            return RespondNotFound(
+                message='No prompt with id "{prompt_id}" found.'
+            ).send(response)
+
+        if UUID(user.user_id) != found_prompt.user_id:
+            return RespondUnauthorised(
+                message='You do not have permission to modify this prompt.'
+            ).send(response)
+
+        found_prompt.defer_count = prompt.deferredCount
+        found_prompt.defer_period = prompt.deferPeriod
+        found_prompt.defer_quantity = prompt.deferQuantity
+
+        db.commit()
+        db.flush()
+
+        return RespondOk({'prompt': found_prompt.to_json()}).send(response)
+
+    except Exception as ex:
+        logger.warning(str(ex))
+        return RespondServerError({'error': str(ex)}).send(response)
+
+
+@router.delete('/prompt/{prompt_id}')
+def delete_prompt(  # pylint: disable = unused-variable
+    response: Response,
+    prompt_id: str,
+    db=Depends(get_db),
+    user: APIUser = Depends(require_auth),
+):
+    """Deletes a prompt."""
+    try:
+        found_prompt = PromptModel.find_by_id(db, prompt_id)
+
+        if not found_prompt:
+            return RespondNotFound(
+                message='No prompt with id "{prompt_id}" found.'
+            ).send(response)
+
+        if UUID(user.user_id) != found_prompt.user_id:
+            return RespondUnauthorised(
+                message='You do not have permission to modify this prompt.'
+            ).send(response)
+
+        found_prompt.deleted = True
+        found_prompt.deleted_on = datetime.now()
+
+        db.commit()
+
+        return RespondOk(message='Prompt deleted successfully').send(response)
 
     except Exception as ex:
         logger.warning(str(ex))

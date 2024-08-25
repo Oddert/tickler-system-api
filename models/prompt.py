@@ -75,6 +75,10 @@ class PromptModel(ORMModelBase):
         return result
 
     @classmethod
-    def find_all_by_username(cls, db: Session, username: str):
+    def find_all_by_username(
+        cls, db: Session, username: str, include_deleted: bool = False
+    ):
         """Returns all prompts for a given username."""
-        return db.query(cls).filter_by(username=username.lower()).all()
+        if include_deleted:
+            return db.query(cls).filter_by(username=username.lower()).all()
+        return db.query(cls).filter_by(username=username.lower(), deleted=False).all()
