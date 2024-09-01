@@ -54,7 +54,7 @@ class PromptModel(ORMModelBase):
             'deletedOn': self.deleted_on,  # string | null; // date
             'description': self.description,  # string | null; // str(2000)
             'links': None,  # string[]; // [] FK.links
-            'prompt_id': str(self.prompt_id),  # string;// uuid
+            'promptId': str(self.prompt_id),  # string;// uuid
             'status': self.status,  #'open' | 'resolved' | 'archived' | 'deleted';
             'title': self.title,  # string;
             'updatedOn': self.updated_on,  # string | null; // date
