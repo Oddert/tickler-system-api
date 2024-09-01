@@ -1,6 +1,7 @@
 import uvicorn
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from resources.auth_resources import router as auth_routes
 from resources.prompt_resources import router as prompt_routes
@@ -14,6 +15,18 @@ server = FastAPI()
 
 server.include_router(prompt_routes, prefix='/v0', tags=['Prompts'])
 server.include_router(auth_routes, tags=['Auth'])
+
+origins = [
+    'http://localhost:3000',
+]
+
+server.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 ORMModelBase.metadata.create_all(bind=engine, checkfirst=True)
 
