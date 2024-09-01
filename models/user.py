@@ -9,6 +9,7 @@ from app.orm import ORMModelBase
 
 
 class UserModel(ORMModelBase):
+    '''Represents a user's details.'''
     __tablename__ = 'user'
 
     user_id = Column(UUID, nullable=False, primary_key=True, default=uuid)
@@ -16,7 +17,8 @@ class UserModel(ORMModelBase):
     password = Column(String, nullable=False)
 
     def to_json(self) -> dict:
-        return {'user_id': str(self.user_id), 'username': self.username}
+        """Returns a JSON serialisable object representing the model."""
+        return {'userId': str(self.user_id), 'username': self.username}
 
     @classmethod
     def find_all(cls, db: Session):
@@ -31,3 +33,11 @@ class UserModel(ORMModelBase):
         if found_user:
             return found_user
         return None
+
+    @classmethod
+    def validate_username(cls, db: Session, username: str) -> bool:
+        """Returns true if a user exists, false if the user does not."""
+        found_user = db.query(cls).filter_by(username=username).first()
+        if found_user:
+            return True
+        return False
