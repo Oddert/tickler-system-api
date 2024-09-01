@@ -1,5 +1,7 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+# pylint: disable=broad-exception-caught
+from fastapi import APIRouter, HTTPException, Depends, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
+from loguru import logger
 from sqlalchemy.orm import Session
 
 from app.db import get_db
@@ -10,7 +12,7 @@ from security.token import create_access_token, create_refresh_token
 from schemas.user import AuthUserPost
 from schemas.auth import APIToken
 
-from utils.responses import RespondOk
+from utils.responses import RespondOk, RespondServerError
 
 from models.user import UserModel
 
@@ -80,6 +82,21 @@ def login_user(
         'access_token': create_access_token(found_user.username),
         'refresh_token': create_refresh_token(found_user.username),
     }
+
+
+@router.get('/user-exists/{username}')
+def user_exists(
+    username: str,
+    response: Response,
+    db: Session = Depends(get_db),
+):
+    '''Queries if a user exists.'''
+    try:
+        exists = UserModel.validate_username(db, username)
+        return RespondOk(payload={'exists': exists}).send(response)
+    except Exception as ex:
+        logger.warning(str(ex))
+        return RespondServerError({'message': str(ex)}).send(response)
 
 
 @router.get('/user')
